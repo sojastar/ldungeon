@@ -5,6 +5,12 @@ class Array
     sum
   end
 
+  def sub(other)
+    dif = []
+    [length, other.length].min.times { |i| dif << at(i) - other.at(i) }
+    dif
+  end
+
   def div(f)
     f = f.to_f
     map { |e| e / f }

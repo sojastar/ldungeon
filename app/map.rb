@@ -7,10 +7,11 @@ module LDungeon
     SURROUNDINGS                = [ LEFT, RIGHT, UP, DOWN ]
     NOT_EMPTY                   = [  0,  0 ]
 
-    GENERATION_GRID_MAX_WIDTH   = 30
-    GENERATION_GRID_MAX_HEIGHT  = 30
+    GENERATION_GRID_MAX_WIDTH   = 100
+    GENERATION_GRID_MAX_HEIGHT  = 100
 
-    attr_reader :current_state, :grid, :connections, :generation_log   # Debug !!!
+    attr_reader :current_state, :grid, :connections, :generation_log,
+                :start_cell
 
 
     ### Initialization :
@@ -23,8 +24,11 @@ module LDungeon
     def reset
       @current_state  = @initial_state
       @generation_log = []
-      @grid           = Grid.new 100, 100, Room.vacant
+      @grid           = Grid.new  GENERATION_GRID_MAX_WIDTH,
+                                  GENERATION_GRID_MAX_HEIGHT,
+                                  Room.vacant
       @connections    = []
+      @start_cell     = [0,0] 
     end
 
 
@@ -125,6 +129,8 @@ module LDungeon
           layout_state[:current_cell] = place_room  Room.new( :start, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     :replace
+          @start_cell = [ layout_state[:current_cell][0],
+                          layout_state[:current_cell][1] ]
         when 'E'
           @generation_log << "2 - in layout - EMPTY room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
           layout_state[:current_cell] = place_room  Room.new(:empty, layout_state[:stack].length),
@@ -156,11 +162,13 @@ module LDungeon
         end
       end
 
-      # Clean-up
+      # Clean-up :
       offset = @grid.fit { |cell| cell.is_vacant? }
 
       @connections.shift
       @connections.each.with_index { |connection,i| connection.offset_by offset }
+
+      @start_cell.sub offset
     end
   end
 end
