@@ -1,5 +1,5 @@
 module LDungeon
-  class Room
+  class Cell
     attr_reader :types, :depth, :connections
 
     def initialize(base_type,depth=0)
@@ -9,7 +9,7 @@ module LDungeon
     end
 
     def self.vacant()
-      Room.new(:vacant)
+      Cell.new(:vacant)
     end
 
     def is_vacant?
@@ -25,17 +25,17 @@ module LDungeon
       @connections.uniq!
     end
 
-    def mix_with(other_room)
-      @types        = ( @types + other_room.types ).uniq
+    def mix_with(other_cell)
+      @types        = ( @types + other_cell.types ).uniq
       @types.delete(:empty)
-      @depth        = [@depth, other_room.depth].max
-      @connections += other_room.connections
+      @depth        = [@depth, other_cell.depth].max
+      @connections += other_cell.connections
     end
 
-    def replace_with(other_room)
-      @types        = other_room.types
-      @depth        = other_room.depth#[@depth, other_room.depth].max
-      @connections  = other_room.connections
+    def replace_with(other_cell)
+      @types        = other_cell.types
+      @depth        = other_cell.depth
+      @connections  = other_cell.connections
     end
 
     def to_s

@@ -19,12 +19,12 @@ class Dungeon
   end
   
   def draw(args,base_x,base_y,cell_width,cell_height)
-    # Drawing rooms :
+    # Drawing room/cells :
     grid  = @map.grid
     grid.height.times do |y|
       grid.width.times do |x|
         unless grid[x,y].is_vacant? then
-          cell_outline, cell_fill, label  = draw_room grid[x,y],
+          cell_outline, cell_fill, label  = draw_cell grid[x,y],
                                                       base_x + x * cell_width,
                                                       base_y + y * cell_height,
                                                       cell_width,
@@ -46,22 +46,22 @@ class Dungeon
     end
   end
 
-  def draw_room(room,x,y,cell_width,cell_height)
-    cell          = [ x, y, cell_width, cell_height ]
-    cell_outline  = cell + [ 0, 0, 0, 255 ]
+  def draw_cell(cell,x,y,cell_width,cell_height)
+    cell_geometry = [ x, y, cell_width, cell_height ]
+    cell_outline  = cell_geometry + [ 0, 0, 0, 255 ]
     color         = case
-                    when room.types.include?(:start)  then  [ 255, 255,   0, 255 ]
-                    when room.types.include?(:boss)   then  [ 255,   0, 255, 255 ]
-                    else                                    case room.depth
+                    when cell.types.include?(:start)  then  [ 255, 255,   0, 255 ]
+                    when cell.types.include?(:boss)   then  [ 255,   0, 255, 255 ]
+                    else                                    case cell.depth
                                                             when 0  then  [   0, 255,   0, 255 ]
                                                             when 1  then  [   0,   0, 255, 255 ]
                                                             else          [ 255,   0,   0, 255 ]
                                                             end
                     end
-    cell_fill     = cell + color
+    cell_fill     = cell_geometry + color
     label         = [ x + 5,
                       y + cell_height - 5,
-                      "#{room.types.inject('') { |list,type| list += type.to_s.capitalize.slice(0,2) }}", -5 ]
+                      "#{cell.types.inject('') { |list,type| list += type.to_s.capitalize.slice(0,2) }}", -5 ]
     
     [cell_outline, cell_fill, label] 
   end

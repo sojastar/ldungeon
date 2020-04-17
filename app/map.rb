@@ -26,7 +26,7 @@ module LDungeon
       @generation_log = []
       @grid           = Grid.new  GENERATION_GRID_MAX_WIDTH,
                                   GENERATION_GRID_MAX_HEIGHT,
-                                  Room.vacant
+                                  Cell.vacant
       @connections    = []
       @start_cell     = [0,0] 
     end
@@ -48,14 +48,14 @@ module LDungeon
 
 
     ### Layout :
-    def room_at(coords)
+    def cell_at(coords)
       @grid[coords[0], coords[1]]
     end
 
     def find_vacant_surrounding(coords)
       SURROUNDINGS.shuffle.each do |direction|
         surrounding = coords.add direction
-        if room_at(surrounding).is_vacant? then
+        if cell_at(surrounding).is_vacant? then
           @generation_log << "2 --- in find_vacant_surrounding : found vacant space at #{surrounding}"
           return surrounding
         end
@@ -74,48 +74,48 @@ module LDungeon
       @connections.uniq!
     end
 
-    def place_room(room,coords,mode=:discard)
+    def place_cell(cell,coords,mode=:discard)
       surrounding = find_vacant_surrounding(coords)
 
       if surrounding == NOT_EMPTY then
         surrounding = random_surrounding(coords)
-        while room_at(surrounding).is_start? == true do
+        while cell_at(surrounding).is_start? == true do
           surrounding = random_surrounding(coords)
         end
 
         case mode
         when :discard
           return coords
-          @generation_log << "2 -- in place_room: discarded new room"
+          @generation_log << "2 -- in place_cell: discarded new cell"
         when :mix
-          room_at(surrounding).mix_with room
-          @generation_log << "2 -- in place_room: mixed room at #{surrounding}"
+          cell_at(surrounding).mix_with cell
+          @generation_log << "2 -- in place_cell: mixed cell at #{surrounding}"
         when :replace
-          room_at(surrounding).replace_with room
-          @generation_log << "2 -- in place_room: replaced room at #{surrounding}"
+          cell_at(surrounding).replace_with cell
+          @generation_log << "2 -- in place_cell: replaced cell at #{surrounding}"
         end
 
       else
-        # Place the new room :
-        room_at(surrounding).replace_with room
-        @generation_log << "2 -- in place_room: placed room at #{surrounding}"
+        # Place the new cell :
+        cell_at(surrounding).replace_with cell
+        @generation_log << "2 -- in place_cell: placed cell at #{surrounding}"
 
-        # Connect it with the previous room :
+        # Connect it with the previous cell :
         connection  = Connection.new  coords.clone, surrounding.clone
         add_connection connection
-        room_at(coords).add_connection connection
-        room_at(surrounding).add_connection connection
-        @generation_log << "2 -- in place_room: placed connection #{connection}"
+        cell_at(coords).add_connection connection
+        cell_at(surrounding).add_connection connection
+        @generation_log << "2 -- in place_cell: placed connection #{connection}"
       end
 
       surrounding
     end
 
-    # possible modes: :discard  -> discard the room if there is no space for it and if it is...
+    # possible modes: :discard  -> discard the cell if there is no space for it and if it is...
     #                              ... not essential for the dungeon ( not start or boss )
-    #                 :mix      -> if there is no space for the room to place, mix it with ...
+    #                 :mix      -> if there is no space for the cell to place, mix it with ...
     #                              ... one that is already there ( if not boss )
-    #                 :replace  -> if there is no space for the room to place, replace the ...
+    #                 :replace  -> if there is no space for the cell to place, replace the ...
     #                              ... previous one that is already there ( if not start or boss )
     def layout(mode=:discard)
       layout_state  = { stack:        [],
@@ -125,30 +125,30 @@ module LDungeon
       @current_state.split('').each do |word|
         case word
         when 'S'
-          @generation_log << "2 - in layout - START room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_room  Room.new( :start, layout_state[:stack].length),
+          @generation_log << "2 - in layout - START cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_cell  Cell.new( :start, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     :replace
           @start_cell = [ layout_state[:current_cell][0],
                           layout_state[:current_cell][1] ]
         when 'E'
-          @generation_log << "2 - in layout - EMPTY room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_room  Room.new(:empty, layout_state[:stack].length),
+          @generation_log << "2 - in layout - EMPTY cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_cell  Cell.new(:empty, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     mode
         when 'C'
-          @generation_log << "2 - in layout - CHALLENGE room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_room  Room.new(:challenge, layout_state[:stack].length),
+          @generation_log << "2 - in layout - CHALLENGE cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_cell  Cell.new(:challenge, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     mode
         when 'L'
-          @generation_log << "2 - in layout - LOOT room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_room  Room.new(:loot, layout_state[:stack].length),
+          @generation_log << "2 - in layout - LOOT cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_cell  Cell.new(:loot, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     mode
         when 'B'
-          @generation_log << "2 - in layout - BOSS room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_room  Room.new(:boss, layout_state[:stack].length),
+          @generation_log << "2 - in layout - BOSS cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_cell  Cell.new(:boss, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     :replace
         when 'P'

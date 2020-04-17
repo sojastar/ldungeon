@@ -1,6 +1,6 @@
 require 'app/extend_array.rb'
 require 'app/map.rb'
-require 'app/room.rb'
+require 'app/cell.rb'
 require 'app/connection.rb'
 require 'app/grid.rb'
 require 'app/dungeon.rb'
