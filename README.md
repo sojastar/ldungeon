@@ -1,3 +1,3 @@
 # ldungeon
 a Ruby dungeon generator using L-systems
-![dungeon_generation.gif]
+![](dungeon_generation.gif)
