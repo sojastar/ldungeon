@@ -15,9 +15,16 @@ module LDungeon
 
     ### Initialization :
     def initialize(initial_state,generation_rules)
-      @current_state    = initial_state
+      @initial_state    = initial_state
       @generation_rules = generation_rules
-      @generation_log   = []
+      reset
+    end
+
+    def reset
+      @current_state  = @initial_state
+      @generation_log = []
+      @grid           = Grid.new 100, 100, Room.vacant
+      @connections    = []
     end
 
 
@@ -38,7 +45,7 @@ module LDungeon
 
     ### Layout :
     def room_at(coords)
-      @grid[coords[1]][coords[0]]
+      @grid[coords[0], coords[1]]
     end
 
     def find_vacant_surrounding(coords)
@@ -90,7 +97,7 @@ module LDungeon
         @generation_log << "2 -- in place_room: placed room at #{surrounding}"
 
         # Connect it with the previous room :
-        connection  = Connection.new  coords, surrounding
+        connection  = Connection.new  coords.clone, surrounding.clone
         add_connection connection
         room_at(coords).add_connection connection
         room_at(surrounding).add_connection connection
@@ -108,58 +115,52 @@ module LDungeon
     #                              ... previous one that is already there ( if not start or boss )
     def layout(mode=:discard)
       layout_state  = { stack:        [],
-                        current_cell: [4,4] }
-      #@grid         = Array.new(10) { Array.new(10, Room.vacant) }
-      @grid = []
-      20.times do |i|
-        line  = []
-        20.times do |j|
-          line << Room.vacant
-        end
-        @grid << line
-      end
-      @connections  = []
+                        current_cell: [ @grid.width >> 2,
+                                        @grid.height >> 2 ] }
 
       @current_state.split('').each do |word|
-        current_room = 
-          case word
-          when 'S'
-            @generation_log << "2 - in layout - START room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = place_room  Room.new( :start, layout_state[:stack].length),
-                                                      layout_state[:current_cell],
-                                                      :replace
-          when 'E'
-            @generation_log << "2 - in layout - EMPTY room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = place_room  Room.new(:empty, layout_state[:stack].length),
-                                                      layout_state[:current_cell],
-                                                      mode
-          when 'C'
-            @generation_log << "2 - in layout - CHALLENGE room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = place_room  Room.new(:challenge, layout_state[:stack].length),
-                                                      layout_state[:current_cell],
-                                                      mode
-          when 'L'
-            @generation_log << "2 - in layout - LOOT room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = place_room  Room.new(:loot, layout_state[:stack].length),
-                                                      layout_state[:current_cell],
-                                                      mode
-          when 'B'
-            @generation_log << "2 - in layout - BOSS room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = place_room  Room.new(:boss, layout_state[:stack].length),
-                                                      layout_state[:current_cell],
-                                                      :replace
-          when 'P'
-            @generation_log << "2 - in layout - PUSH from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:stack] << layout_state[:current_cell]
-          when 'p'
-            @generation_log << "2 - in layout - POP from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = layout_state[:stack].pop
-          else
-            @generation_log << "2 - unknown layout char #{word}"
-          end
+        case word
+        when 'S'
+          @generation_log << "2 - in layout - START room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_room  Room.new( :start, layout_state[:stack].length),
+                                                    layout_state[:current_cell],
+                                                    :replace
+        when 'E'
+          @generation_log << "2 - in layout - EMPTY room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_room  Room.new(:empty, layout_state[:stack].length),
+                                                    layout_state[:current_cell],
+                                                    mode
+        when 'C'
+          @generation_log << "2 - in layout - CHALLENGE room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_room  Room.new(:challenge, layout_state[:stack].length),
+                                                    layout_state[:current_cell],
+                                                    mode
+        when 'L'
+          @generation_log << "2 - in layout - LOOT room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_room  Room.new(:loot, layout_state[:stack].length),
+                                                    layout_state[:current_cell],
+                                                    mode
+        when 'B'
+          @generation_log << "2 - in layout - BOSS room from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = place_room  Room.new(:boss, layout_state[:stack].length),
+                                                    layout_state[:current_cell],
+                                                    :replace
+        when 'P'
+          @generation_log << "2 - in layout - PUSH from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:stack] << layout_state[:current_cell]
+        when 'p'
+          @generation_log << "2 - in layout - POP from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          layout_state[:current_cell] = layout_state[:stack].pop
+        else
+          @generation_log << "2 - unknown layout char #{word}"
+        end
       end
 
+      # Clean-up
+      offset = @grid.fit { |cell| cell.is_vacant? }
+
       @connections.shift
+      @connections.each.with_index { |connection,i| connection.offset_by offset }
     end
   end
 end

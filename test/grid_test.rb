@@ -31,6 +31,20 @@ describe LDungeon::Grid do
   end
 
   it 'can refit itself around content that is not the init object' do
+    g = LDungeon::Grid.new 11, 11, LDungeon::Room.vacant
+    g[4,3]  = c1  = LDungeon::Room.new :start,      1
+    g[3,4]  = c2  = LDungeon::Room.new :challenge,  2
+    g[5,4]  = c3  = LDungeon::Room.new :loot,       3
+    g[4,5]  = c4  = LDungeon::Room.new :boss,       4
+
+    g.fit { |cell| cell.is_vacant? }
+
+    assert_equal  3,  g.width
+    assert_equal  3,  g.height
+    assert_equal  c1, g[1,0]
+    assert_equal  c2, g[0,1]
+    assert_equal  c3, g[2,1]
+    assert_equal  c4, g[1,2]
   end
 end
 

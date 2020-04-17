@@ -8,17 +8,24 @@ module LDungeon
     end
 
     def ==(other)
-      if point1 == other.point1 && point2 == other.point2 then
+      if @point1 == other.point1 && @point2 == other.point2 then
         true
-      elsif point1 == other.point2 && point2 == other.point1 then
+      elsif @point1 == other.point2 && @point2 == other.point1 then
         true
       else
         false
       end
     end
 
+    def offset_by(offset)
+      @point1[0]  -= offset[0]
+      @point1[1]  -= offset[1]
+      @point2[0]  -= offset[0]
+      @point2[1]  -= offset[1]
+    end
+
     def to_s
-      "from #{point1[0]},#{point1[1]} to #{point2[0]},#{point2[1]}"
+      "from #{@point1[0]};#{@point1[1]} to #{@point2[0]};#{@point2[1]}"
     end
   end
 end
