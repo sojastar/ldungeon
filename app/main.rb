@@ -19,14 +19,23 @@ LOG_PATH        = 'generation_log.txt'
 ### SETUP :
 def setup(args)
 
-  args.state.iterations = 1
   # vvvvvvvvvvv GENERATING THE DUNGEON vvvvvvvvvvvvvvvvv #
 
-  args.state.dungeon  = Dungeon.new 'SECECB',               # initial state
-                                    { 'S'  => 'CES',        # generation rules
-                                      'C'  => 'PECLpC' },
-                                    args.state.iterations,  # generation iteration count
-                                    :mix                    # layout mode
+  dungeon_initial_state     = 'SececE'
+  dungeon_generation_rules  = { 'S' => 'ceS',        
+                                'c' => 'Peclpc' }
+  args.state.iterations     = 1   # generation iteration count
+  dungeon_layout_rules      = { 'e' => {  type: :empty,
+                                          mode: :mix  },
+                                'c' => {  type: :challenge,
+                                          mode: :mix  },
+                                'l' => {  type: :loot,
+                                          mode: :mix  } }
+
+  args.state.dungeon  = Dungeon.new dungeon_initial_state,
+                                    dungeon_generation_rules,
+                                    args.state.iterations,
+                                    dungeon_layout_rules
 
   # ^^^^^^^^^^^ GENERATING THE DUNGEON ^^^^^^^^^^^^^^^^^ #
 
@@ -58,8 +67,7 @@ def tick(args)
   end
 
   if args.inputs.keyboard.key_down.g then
-    args.state.dungeon.generate args.state.iterations,
-                                :mix
+    args.state.dungeon.generate args.state.iterations
   end
 
   if args.inputs.keyboard.key_down.d then

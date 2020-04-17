@@ -11,13 +11,14 @@ module LDungeon
     GENERATION_GRID_MAX_HEIGHT  = 100
 
     attr_reader :current_state, :grid, :connections, :generation_log,
-                :start_cell
+                :start_cell, :end_cell
 
 
     ### Initialization :
-    def initialize(initial_state,generation_rules)
+    def initialize(initial_state,generation_rules,layout_rules)
       @initial_state    = initial_state
       @generation_rules = generation_rules
+      @layout_rules     = layout_rules
       reset
     end
 
@@ -29,6 +30,7 @@ module LDungeon
                                   Cell.vacant
       @connections    = []
       @start_cell     = [0,0] 
+      @end_cell       = [0,0]
     end
 
 
@@ -117,7 +119,7 @@ module LDungeon
     #                              ... one that is already there ( if not boss )
     #                 :replace  -> if there is no space for the cell to place, replace the ...
     #                              ... previous one that is already there ( if not start or boss )
-    def layout(mode=:discard)
+    def layout
       layout_state  = { stack:        [],
                         current_cell: [ @grid.width >> 2,
                                         @grid.height >> 2 ] }
@@ -131,34 +133,51 @@ module LDungeon
                                                     :replace
           @start_cell = [ layout_state[:current_cell][0],
                           layout_state[:current_cell][1] ]
+
+        #when 'E'
+        #  @generation_log << "2 - in layout - EMPTY cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+        #  layout_state[:current_cell] = place_cell  Cell.new(:empty, layout_state[:stack].length),
+        #                                            layout_state[:current_cell],
+        #                                            mode
+        #when 'C'
+        #  @generation_log << "2 - in layout - CHALLENGE cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+        #  layout_state[:current_cell] = place_cell  Cell.new(:challenge, layout_state[:stack].length),
+        #                                            layout_state[:current_cell],
+        #                                            mode
+        #when 'L'
+        #  @generation_log << "2 - in layout - LOOT cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+        #  layout_state[:current_cell] = place_cell  Cell.new(:loot, layout_state[:stack].length),
+        #                                            layout_state[:current_cell],
+        #                                            mode
         when 'E'
-          @generation_log << "2 - in layout - EMPTY cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_cell  Cell.new(:empty, layout_state[:stack].length),
-                                                    layout_state[:current_cell],
-                                                    mode
-        when 'C'
-          @generation_log << "2 - in layout - CHALLENGE cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_cell  Cell.new(:challenge, layout_state[:stack].length),
-                                                    layout_state[:current_cell],
-                                                    mode
-        when 'L'
-          @generation_log << "2 - in layout - LOOT cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_cell  Cell.new(:loot, layout_state[:stack].length),
-                                                    layout_state[:current_cell],
-                                                    mode
-        when 'B'
-          @generation_log << "2 - in layout - BOSS cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+          @generation_log << "2 - in layout - END cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
           layout_state[:current_cell] = place_cell  Cell.new(:boss, layout_state[:stack].length),
                                                     layout_state[:current_cell],
                                                     :replace
+          @end_cell = [ layout_state[:current_cell][0],
+                        layout_state[:current_cell][1] ]
+
         when 'P'
           @generation_log << "2 - in layout - PUSH from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
           layout_state[:stack] << layout_state[:current_cell]
+
         when 'p'
           @generation_log << "2 - in layout - POP from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
           layout_state[:current_cell] = layout_state[:stack].pop
+
         else
-          @generation_log << "2 - unknown layout char #{word}"
+          if @layout_rules.keys.include? word then
+            rule = @layout_rules[word]
+            @generation_log << "2 - in layout - #{rule[:type].to_s.capitalize} cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
+            layout_state[:current_cell] = place_cell  Cell.new(rule[:type], layout_state[:stack].length),
+                                                      layout_state[:current_cell],
+                                                      rule[:mode]
+
+          else
+            @generation_log << "2 - unknown layout char #{word}"
+
+          end
+
         end
       end
 
@@ -169,6 +188,7 @@ module LDungeon
       @connections.each.with_index { |connection,i| connection.offset_by offset }
 
       @start_cell.sub offset
+      @end_cell.sub   offset
     end
   end
 end
