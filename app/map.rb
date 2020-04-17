@@ -103,7 +103,7 @@ module LDungeon
         @generation_log << "2 -- in place_cell: placed cell at #{surrounding}"
 
         # Connect it with the previous cell :
-        connection  = Connection.new  coords.clone, surrounding.clone
+        connection  = Connection.new  coords, surrounding
         add_connection connection
         cell_at(coords).add_connection connection
         cell_at(surrounding).add_connection connection

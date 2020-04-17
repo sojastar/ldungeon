@@ -3,8 +3,8 @@ module LDungeon
     attr_accessor :point1, :point2
 
     def initialize(point1,point2)
-      @point1 = point1
-      @point2 = point2
+      @point1 = point1.clone  # ugly but avoids nasty cross reference bugs !!!
+      @point2 = point2.clone
     end
 
     def ==(other)
