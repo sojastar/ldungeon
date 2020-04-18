@@ -123,37 +123,33 @@ module LDungeon
       layout_state  = { stack:        [],
                         current_cell: [ @grid.width >> 2,
                                         @grid.height >> 2 ] }
+      is_first_cell = true
 
       @current_state.split('').each do |word|
         case word
         when 'S'
           @generation_log << "2 - in layout - START cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_cell  Cell.new( :start, layout_state[:stack].length),
-                                                    layout_state[:current_cell],
-                                                    :replace
+          if is_first_cell then
+            cell_at(layout_state[:current_cell]).replace_with Cell.new( :start, layout_state[:stack].length)
+            is_first_cell = false
+          else
+            layout_state[:current_cell] = place_cell  Cell.new( :start, layout_state[:stack].length),
+                                                      layout_state[:current_cell],
+                                                      :replace
+          end
           @start_cell = [ layout_state[:current_cell][0],
                           layout_state[:current_cell][1] ]
 
-        #when 'E'
-        #  @generation_log << "2 - in layout - EMPTY cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-        #  layout_state[:current_cell] = place_cell  Cell.new(:empty, layout_state[:stack].length),
-        #                                            layout_state[:current_cell],
-        #                                            mode
-        #when 'C'
-        #  @generation_log << "2 - in layout - CHALLENGE cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-        #  layout_state[:current_cell] = place_cell  Cell.new(:challenge, layout_state[:stack].length),
-        #                                            layout_state[:current_cell],
-        #                                            mode
-        #when 'L'
-        #  @generation_log << "2 - in layout - LOOT cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-        #  layout_state[:current_cell] = place_cell  Cell.new(:loot, layout_state[:stack].length),
-        #                                            layout_state[:current_cell],
-        #                                            mode
         when 'E'
           @generation_log << "2 - in layout - END cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-          layout_state[:current_cell] = place_cell  Cell.new(:boss, layout_state[:stack].length),
-                                                    layout_state[:current_cell],
-                                                    :replace
+          if is_first_cell then
+            cell_at(layout_state[:current_cell]).replace_with Cell.new(:boss, layout_state[:stack].length)
+            is_first_cell = false
+          else
+            layout_state[:current_cell] = place_cell  Cell.new(:boss, layout_state[:stack].length),
+                                                      layout_state[:current_cell],
+                                                      :replace
+          end
           @end_cell = [ layout_state[:current_cell][0],
                         layout_state[:current_cell][1] ]
 
@@ -169,9 +165,14 @@ module LDungeon
           if @layout_rules.keys.include? word then
             rule = @layout_rules[word]
             @generation_log << "2 - in layout - #{rule[:type].to_s.capitalize} cell from #{layout_state[:current_cell]}, stack depth #{layout_state[:stack].length}"
-            layout_state[:current_cell] = place_cell  Cell.new(rule[:type], layout_state[:stack].length),
-                                                      layout_state[:current_cell],
-                                                      rule[:mode]
+            if is_first_cell then
+              cell_at(layout_state[:current_cell]).replace_with Cell.new(rule[:type], layout_state[:stack].length)
+              is_first_cell = false
+            else
+              layout_state[:current_cell] = place_cell  Cell.new(rule[:type], layout_state[:stack].length),
+                                                        layout_state[:current_cell],
+                                                        rule[:mode]
+            end
 
           else
             @generation_log << "2 - unknown layout char #{word}"
