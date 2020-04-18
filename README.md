@@ -33,7 +33,8 @@ LDungeon automatically places cells one after another, trying to avoid overlaps.
   * `:replace` mode will replace the previous cell with the new cell.
   * `:mix` mode will mix the previous cell with the new cell, resulting in a multityped cell (a cell can have a `[:challenge,:loot]` type).
   * `:discard` will give up on placing the new cell if there is no space available for it.
-Connections between cells are automatically added and are available as a `connections` property for each cell.
+Connections between cells are automatically added and are available as a `connections` property for each cell.\
+Created cells also retain the depth of the stack at the moment of their creation. This depth information represents the distance from this cell to the initial path and can be used in any way you like : challenge difficulty, placing of important items (keys, rare loot, etc) to name a few.
   
 ### Push and pop :
 So far, the string defines strictly linear dungeons. This is where the two other reserved characters come into play. 'P' and 'p' respectivly mean push and pop. As their names imply, they push and pop the current position the placing algorythm is at on and from a stack. So the string `'SPclpclE'` means:
@@ -46,7 +47,7 @@ So far, the string defines strictly linear dungeons. This is where the two other
   1. place a `:loot` cell
   1. place an `:end` cell\
 
-At point 6 you have effectively created a branch. Thus, by placing push and pop instructions in your iteration rules, you can create branches around your main path from the start cell to the end cell.
+At point 6 you have effectively created a branch. Thus, by placing push and pop instructions in your iteration rules, you can create branches around your initial path from the start cell to the end cell.
 
 ### Traversing the dungeon :
 The __Map__ class exposes the `start_cell` and `end_cell` properties. The __Cell__ class exposes connections to other cells as a `connections` property which returns an array of __Connection__ objects. The __Connection__ class is just a collection of two endpoints (an endpoint is represented as an array of two integer coordinates in the map's grid), one for the cell, the other one for the connecting cell.
