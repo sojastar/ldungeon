@@ -45,7 +45,7 @@ So far, the string defines strictly linear dungeons. This is where the two other
   1. pop the last position from the stack (i.e. the `:start` cell position)
   1. place a `:challenge` cell (starting from the  `:start` cell position)
   1. place a `:loot` cell
-  1. place an `:end` cell\
+  1. place an `:end` cell
 
 At point 6 you have effectively created a branch. Thus, by placing push and pop instructions in your iteration rules, you can create branches around your initial path from the start cell to the end cell.
 
