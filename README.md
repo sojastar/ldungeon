@@ -44,8 +44,9 @@ So far, the string defines strictly linear dungeons. This is where the two other
   1. pop the last position from the stack (i.e. the `:start` cell position)
   1. place a `:challenge` cell (starting from the  `:start` cell position)
   1. place a `:loot` cell
-  1. place an `:end` cell
-At point 6 you have effectively created a branch.
+  1. place an `:end` cell\
+
+At point 6 you have effectively created a branch. Thus, by placing push and pop instructions in your iteration rules, you can create branches around your main path from the start cell to the end cell.
 
 ### Traversing the dungeon :
 The __Map__ class exposes the `start_cell` and `end_cell` properties. The __Cell__ class exposes connections to other cells as a `connections` property which returns an array of __Connection__ objects. The __Connection__ class is just a collection of two endpoints (an endpoint is represented as an array of two integer coordinates in the map's grid), one for the cell, the other one for the connecting cell.
