@@ -1,8 +1,8 @@
-require 'app/extend_array.rb'
-require 'app/map.rb'
-require 'app/cell.rb'
-require 'app/connection.rb'
-require 'app/grid.rb'
+require 'lib/extend_array.rb'
+require 'lib/map.rb'
+require 'lib/cell.rb'
+require 'lib/connection.rb'
+require 'lib/grid.rb'
 require 'app/dungeon.rb'
 
 
