@@ -5,7 +5,7 @@ describe LDungeon::Grid do
   it 'initializes' do
     w = 5
     h = 4
-    g = LDungeon::Grid.new w, h, LDungeon::Room.vacant
+    g = LDungeon::Grid.new w, h, LDungeon::Cell.vacant
 
     assert_equal  w, g.width
     assert_equal  h, g.height 
@@ -22,8 +22,8 @@ describe LDungeon::Grid do
   end
 
   it 'can access an element by its coordinates' do
-    g = LDungeon::Grid.new 5, 4, LDungeon::Room.vacant
-    g[3,1] = LDungeon::Room.new(:challenge, 4)
+    g = LDungeon::Grid.new 5, 4, LDungeon::Cell.vacant
+    g[3,1] = LDungeon::Cell.new(:challenge, 4)
 
     assert_equal  [:challenge], g[3,1].types
     assert_equal  4,            g[3,1].depth
@@ -31,11 +31,11 @@ describe LDungeon::Grid do
   end
 
   it 'can refit itself around content that is not the init object' do
-    g = LDungeon::Grid.new 11, 11, LDungeon::Room.vacant
-    g[4,3]  = c1  = LDungeon::Room.new :start,      1
-    g[3,4]  = c2  = LDungeon::Room.new :challenge,  2
-    g[5,4]  = c3  = LDungeon::Room.new :loot,       3
-    g[4,5]  = c4  = LDungeon::Room.new :boss,       4
+    g = LDungeon::Grid.new 11, 11, LDungeon::Cell.vacant
+    g[4,3]  = c1  = LDungeon::Cell.new :start,      1
+    g[3,4]  = c2  = LDungeon::Cell.new :challenge,  2
+    g[5,4]  = c3  = LDungeon::Cell.new :loot,       3
+    g[4,5]  = c4  = LDungeon::Cell.new :boss,       4
 
     g.fit { |cell| cell.is_vacant? }
 

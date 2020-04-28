@@ -4,8 +4,8 @@ module LDungeon
     MIN_XY  = -MAX_XY - 1
     def initialize(width,height,init_object)
       @init_object  = init_object
-      @elements     = height.times.inject([]) do |lines,i|
-                        lines << width.times.inject([]) { |new_line,j| new_line << init_object.clone }
+      @elements     = height.times.inject([]) do |lines,x|
+                        lines << width.times.inject([]) { |line,x| line << init_object.clone }
                       end
     end
 
