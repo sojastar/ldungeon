@@ -185,7 +185,6 @@ module LDungeon
       # Clean-up :
       offset = @grid.fit { |cell| cell.is_vacant? }
 
-      @connections.shift
       @connections.each.with_index { |connection,i| connection.offset_by offset }
 
       @start_cell.sub offset

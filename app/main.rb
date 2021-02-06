@@ -21,14 +21,19 @@ def setup(args)
 
   # vvvvvvvvvvv GENERATING THE DUNGEON vvvvvvvvvvvvvvvvv #
 
-  dungeon_initial_state     = 'SececE'
-  dungeon_generation_rules  = { 'S' => 'ceS',        
-                                'c' => 'Peclpc' }
+  #dungeon_initial_state     = 'SececE'
+  dungeon_initial_state     = 'ScE'
+  #dungeon_generation_rules  = { 'S' => 'ceS',        
+  dungeon_generation_rules  = { 'S' => 'Sec',        
+                                #'c' => 'Peclpc' }
+                                'c' => 'cPlpc' }
   args.state.iterations     = 1   # generation iteration count
   dungeon_layout_rules      = { 'e' => {  type: :empty,
-                                          mode: :mix  },
+                                          #mode: :mix  },
+                                          mode: :discard  },
                                 'c' => {  type: :challenge,
-                                          mode: :mix  },
+                                          #mode: :mix  },
+                                          mode: :replace  },
                                 'l' => {  type: :loot,
                                           mode: :mix  } }
 
