@@ -16,10 +16,10 @@ In LDungeon, the dungeon generation is handled by the __Map__ class defined in t
 * the iteration rules define the transformations applied to the string. Let's consider the following hash:\
 `{ 'S' => 'lcS',  
    'e' => 'cle' }`\
-These rules mean: when you see a 'S', replace it with 'lcS', and when you see an 'e', replace it with 'lc'. So iterating on our initial string would look like this:
-  1. first iteration:  `'SeclE'`
-  1. second iteration: `'lcScleclE'`
-  1. third iteration:  `'lclcSclcleclE'`\
+These rules mean: when you see a 'S', replace it with 'lcS', and when you see an 'e', replace it with 'cle'. So iterating on our initial string would look like this:
+  1. no iteration:     `'SeclE'`
+  1. first iteration:  `'lcScleclE'`
+  1. second iteration: `'lclcSclcleclE'`\
   ...
 * the layout rules hash is where you can map each character in the string to a layout rule. Again, let's consider an example:\
 `{ 'e' => { type: :empty,
