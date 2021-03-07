@@ -3,13 +3,13 @@ class Dungeon
 
   attr_accessor :map
 
-  def initialize(initial_state,generation_rules,iterations,layout_rules)
-    @map  = Map.new initial_state, generation_rules, layout_rules
-    generate(iterations)
+  def initialize(initial_state,generation_rules,iterations,layout_rules,grid_max_size)
+    @map  = Map.new initial_state, generation_rules, layout_rules, grid_max_size
+    generate(iterations,grid_max_size)
   end
 
-  def generate(iterations)
-    @map.reset
+  def generate(iterations,grid_max_size)
+    @map.reset grid_max_size
     @map.iterate iterations
     @map.layout   
   end

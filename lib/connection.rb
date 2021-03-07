@@ -16,6 +16,7 @@ module LDungeon
         false
       end
     end
+    alias eql? ==
 
     def offset_by(offset)
       @point1[0]  -= offset[0]
@@ -27,6 +28,7 @@ module LDungeon
     def to_s
       "from #{@point1[0]};#{@point1[1]} to #{@point2[0]};#{@point2[1]}"
     end
+    alias inspect to_s
   end
 end
 

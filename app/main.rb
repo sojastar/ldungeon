@@ -10,6 +10,8 @@ require 'app/dungeon.rb'
 MIN_ITERATIONS  = 1
 MAX_ITERATIONS  = 3
 
+GRID_MAX_SIZE   = [ 10, 10 ]
+
 LOG_PATH        = 'generation_log.txt'
 
 
@@ -40,7 +42,8 @@ def setup(args)
   args.state.dungeon  = Dungeon.new dungeon_initial_state,
                                     dungeon_generation_rules,
                                     args.state.iterations,
-                                    dungeon_layout_rules
+                                    dungeon_layout_rules,
+                                    GRID_MAX_SIZE
 
   # ^^^^^^^^^^^ GENERATING THE DUNGEON ^^^^^^^^^^^^^^^^^ #
 
@@ -72,7 +75,7 @@ def tick(args)
   end
 
   if args.inputs.keyboard.key_down.g then
-    args.state.dungeon.generate args.state.iterations
+    args.state.dungeon.generate args.state.iterations, GRID_MAX_SIZE
   end
 
   if args.inputs.keyboard.key_down.d then

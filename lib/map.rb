@@ -7,26 +7,25 @@ module LDungeon
     SURROUNDINGS                = [ LEFT, RIGHT, UP, DOWN ]
     NOT_EMPTY                   = [  0,  0 ]
 
-    GENERATION_GRID_MAX_WIDTH   = 100
-    GENERATION_GRID_MAX_HEIGHT  = 100
-
-    attr_reader :current_state, :grid, :connections, :generation_log,
+    attr_reader :current_state,
+                :generation_log,
+                :grid, :connections,
                 :start_cell, :end_cell
 
 
     ### Initialization :
-    def initialize(initial_state,generation_rules,layout_rules)
+    def initialize(initial_state,generation_rules,layout_rules,grid_max_size)
       @initial_state    = initial_state
       @generation_rules = generation_rules
       @layout_rules     = layout_rules
-      reset
+      reset grid_max_size
     end
 
-    def reset
+    def reset(grid_max_size)
       @current_state  = @initial_state
       @generation_log = []
-      @grid           = Grid.new  GENERATION_GRID_MAX_WIDTH,
-                                  GENERATION_GRID_MAX_HEIGHT,
+      @grid           = Grid.new  grid_max_size[0],
+                                  grid_max_size[1],
                                   Cell.vacant
       @connections    = []
       @start_cell     = [0,0] 
@@ -56,10 +55,13 @@ module LDungeon
 
     def find_vacant_surrounding(coords)
       SURROUNDINGS.shuffle.each do |direction|
-        surrounding = coords.add direction
-        if cell_at(surrounding).is_vacant? then
-          @generation_log << "2 --- in find_vacant_surrounding : found vacant space at #{surrounding}"
-          return surrounding
+        surrounding  = coords.add direction
+
+        if surrounding[0] >= 0 && surrounding[1] >= 0 && surrounding[0] < @grid.width && surrounding[1] < @grid.height then
+          if cell_at(surrounding).is_vacant? then
+            @generation_log << "2 --- in find_vacant_surrounding : found vacant space at #{surrounding}"
+            return surrounding
+          end
         end
       end
 
@@ -68,7 +70,13 @@ module LDungeon
     end
 
     def random_surrounding(coords)
-      coords.add SURROUNDINGS.sample
+      SURROUNDINGS.shuffle.each do |direction|
+        surrounding  = coords.add direction
+
+        if surrounding[0] >= 0 && surrounding[1] >= 0 && surrounding[0] < @grid.width && surrounding[1] < @grid.height then
+          return surrounding
+        end
+      end
     end
 
     def add_connection(connection)
@@ -87,28 +95,29 @@ module LDungeon
 
         case mode
         when :discard
-          return coords
           @generation_log << "2 -- in place_cell: discarded new cell"
+          return coords
         when :mix
-          cell_at(surrounding).mix_with cell
           @generation_log << "2 -- in place_cell: mixed cell at #{surrounding}"
+          cell_at(surrounding).mix_with cell
         when :replace
-          cell_at(surrounding).replace_with cell
           @generation_log << "2 -- in place_cell: replaced cell at #{surrounding}"
+          cell_at(surrounding).replace_with cell
         end
 
       else
         # Place the new cell :
-        cell_at(surrounding).replace_with cell
         @generation_log << "2 -- in place_cell: placed cell at #{surrounding}"
+        cell_at(surrounding).replace_with cell
 
-        # Connect it with the previous cell :
-        connection  = Connection.new  coords, surrounding
-        add_connection connection
-        cell_at(coords).add_connection connection
-        cell_at(surrounding).add_connection connection
-        @generation_log << "2 -- in place_cell: placed connection #{connection}"
       end
+
+      # Connect it with the previous cell :
+      connection  = Connection.new  coords, surrounding
+      add_connection connection
+      cell_at(coords).add_connection connection
+      cell_at(surrounding).add_connection connection
+      @generation_log << "2 -- in place_cell: placed connection #{connection}"
 
       surrounding
     end
@@ -121,8 +130,8 @@ module LDungeon
     #                              ... previous one that is already there ( if not start or boss )
     def layout
       layout_state  = { stack:        [],
-                        current_cell: [ @grid.width >> 2,
-                                        @grid.height >> 2 ] }
+                        current_cell: [ @grid.width >> 1,
+                                        @grid.height >> 1 ] }
       is_first_cell = true
 
       @current_state.split('').each do |word|
@@ -185,7 +194,8 @@ module LDungeon
       # Clean-up :
       offset = @grid.fit { |cell| cell.is_vacant? }
 
-      @connections.each.with_index { |connection,i| connection.offset_by offset }
+      @connections.uniq!
+      @connections.each { |connection| connection.offset_by offset }
 
       @start_cell.sub offset
       @end_cell.sub   offset

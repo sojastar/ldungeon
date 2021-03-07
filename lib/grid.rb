@@ -1,37 +1,37 @@
 module LDungeon
   class Grid
-    MAX_XY  = 4611686018427387903 
-    MIN_XY  = -MAX_XY - 1
+    attr_reader :cells
+
     def initialize(width,height,init_object)
       @init_object  = init_object
-      @elements     = height.times.inject([]) do |lines,x|
+      @cells     = height.times.inject([]) do |lines,x|
                         lines << width.times.inject([]) { |line,x| line << init_object.clone }
                       end
     end
 
     def [](x,y)
-      @elements[y][x]
+      @cells[y][x]
     end
 
     def []=(x,y,value)
-      @elements[y][x] = value
+      @cells[y][x] = value
     end
 
     def width
-      @elements.first.length
+      @cells.first.length
     end
 
     def height
-      @elements.length
+      @cells.length
     end
 
     def fit(&vacant_discriminator)
-      max_x, max_y = MIN_XY, MIN_XY
-      min_x, min_y = MAX_XY, MAX_XY
+      max_x, max_y = 0, 0
+      min_x, min_y = width, height
 
-      @elements.each.with_index do |line,y|
-        line.each.with_index do |element,x|
-          unless vacant_discriminator.call(element) then
+      @cells.each.with_index do |line,y|
+        line.each.with_index do |cell,x|
+          unless vacant_discriminator.call(cell) then
             min_x = x if x < min_x
             min_y = y if y < min_y
             max_x = x if x > max_x
@@ -40,10 +40,19 @@ module LDungeon
         end
       end
 
-      @elements = @elements.slice min_y, max_y - min_y + 1
-      @elements.map! { |line| line.slice min_x, max_x - min_x + 1 }
+      @cells = @cells.slice min_y, max_y - min_y + 1
+      @cells.map! { |line| line.slice min_x, max_x - min_x + 1 }
 
-      [min_x,min_y]
+      [ min_x, min_y ]
+    end
+
+    def to_string(&vacant_discriminator)
+      debug_string  = "- size: #{width}x#{height}\n-cells:\n"
+      @cells.reverse.each do |line|
+        debug_string += line.inject("  ") { |s,cell| s += ( vacant_discriminator.call(cell) ? "O" : "X" ) } + "\n"
+      end
+
+      debug_string
     end
   end
 end

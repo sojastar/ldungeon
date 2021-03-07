@@ -30,6 +30,7 @@ module LDungeon
       @types.delete(:empty)
       @depth        = [@depth, other_cell.depth].max
       @connections += other_cell.connections
+      puts "---- in Connection#mix_with: #{@connections}"
     end
 
     def replace_with(other_cell)
